@@ -4,10 +4,50 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useInvoices } from "@/hooks/use-invoices";
 import { Plus, FileText, DollarSign, TrendingUp, ArrowRight, AlertCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/utils/format";
+
+function DashboardSkeleton() {
+  return (
+    <div>
+      <Skeleton className="h-9 w-32 mb-1" />
+      <Skeleton className="h-5 w-48 mb-8" />
+      <div className="grid gap-4 md:grid-cols-3 mb-8">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-10 w-10 rounded-xl" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-7 w-24 mb-1" />
+              <Skeleton className="h-4 w-16" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <Skeleton className="h-6 w-40" />
+          <Skeleton className="h-5 w-24" />
+        </div>
+        <div className="rounded-2xl border-2 border-foreground overflow-hidden">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="grid grid-cols-5 gap-4 p-4 border-b-2 border-foreground last:border-0">
+              <Skeleton className="h-5 w-28" />
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-5 w-20" />
+              <Skeleton className="h-5 w-24 rounded-full" />
+              <Skeleton className="h-5 w-24" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const { invoices, loading, error, refetch } = useInvoices({ limit: 5 });
@@ -18,7 +58,7 @@ export default function DashboardPage() {
     (i) => i.status === "paid" && new Date(i.paidAt || 0) > new Date(Date.now() - 30 * 86400000)
   );
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <DashboardSkeleton />;
 
   if (error) {
     return (

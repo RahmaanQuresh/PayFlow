@@ -4,14 +4,43 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus, Users, AlertCircle } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useClients } from "@/hooks/use-clients";
 import { formatCurrency } from "@/lib/utils/format";
+
+function ClientsSkeleton() {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <Skeleton className="h-9 w-32 mb-2" />
+          <Skeleton className="h-5 w-48" />
+        </div>
+        <Skeleton className="h-10 w-36 rounded-xl" />
+      </div>
+      <div className="rounded-2xl border-2 border-foreground overflow-hidden">
+        <div className="grid grid-cols-4 gap-4 p-4 border-b-2 border-foreground bg-muted/50">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-4 w-16" />
+          ))}
+        </div>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="grid grid-cols-4 gap-4 p-4 border-b-2 border-foreground last:border-0">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-5 w-8" />
+            <Skeleton className="h-5 w-20" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function ClientsPage() {
   const { clients, loading, error, refetch } = useClients();
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <ClientsSkeleton />;
 
   if (error) {
     return (

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useReminders } from "@/hooks/use-reminders";
 import { Plus, Bell, Edit, AlertCircle } from "lucide-react";
 
@@ -14,10 +14,44 @@ const toneGradients: Record<string, string> = {
   legal: "from-destructive to-rose-400",
 };
 
+function RemindersSkeleton() {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <Skeleton className="h-9 w-56 mb-2" />
+          <Skeleton className="h-5 w-72" />
+        </div>
+        <Skeleton className="h-10 w-40 rounded-xl" />
+      </div>
+      <div className="relative pl-8">
+        <div className="absolute left-4 top-0 bottom-0 w-0.5 border-l-2 border-dashed border-foreground/15" />
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="group relative">
+              <div className="absolute -left-8 top-6 h-4 w-4 rounded-full bg-muted border-2 border-foreground" />
+              <CardContent className="flex items-center justify-between py-5">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-12 w-12 rounded-xl" />
+                  <div>
+                    <Skeleton className="h-5 w-40 mb-2" />
+                    <Skeleton className="h-4 w-56" />
+                  </div>
+                </div>
+                <Skeleton className="h-8 w-20 rounded-lg" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function RemindersPage() {
   const { sequences, loading, error, refetch } = useReminders();
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <RemindersSkeleton />;
 
   if (error) {
     return (
@@ -46,10 +80,20 @@ export default function RemindersPage() {
 
       {sequences.length === 0 ? (
         <Card className="p-10 text-center">
-          <p className="text-muted-foreground font-medium">No reminder sequences configured yet.</p>
-          <Link href="/reminders/new" className="mt-4 inline-block">
-            <Button variant="gradient" size="sm"><Plus className="h-4 w-4 mr-2" />Create Sequence</Button>
-          </Link>
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-primary to-secondary border-2 border-foreground shadow-hard">
+              <Bell className="h-8 w-8 text-white" strokeWidth={2.5} />
+            </div>
+            <div>
+              <h3 className="font-display font-extrabold text-xl">No reminder sequences</h3>
+              <p className="text-sm text-muted-foreground font-medium mt-1 max-w-xs">
+                Set up automated payment reminders to follow up with clients.
+              </p>
+            </div>
+            <Link href="/reminders/new">
+              <Button variant="gradient"><Plus className="h-4 w-4 mr-2" />Create Sequence</Button>
+            </Link>
+          </div>
         </Card>
       ) : (
         <div className="relative pl-8">

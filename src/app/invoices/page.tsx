@@ -5,14 +5,44 @@ import { Button } from "@/components/ui/button";
 import { Plus, FileText, AlertCircle } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useInvoices } from "@/hooks/use-invoices";
 import { formatCurrency } from "@/lib/utils/format";
+
+function InvoicesSkeleton() {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <Skeleton className="h-9 w-40 mb-2" />
+          <Skeleton className="h-5 w-56" />
+        </div>
+        <Skeleton className="h-10 w-40 rounded-xl" />
+      </div>
+      <div className="rounded-2xl border-2 border-foreground overflow-hidden">
+        <div className="grid grid-cols-5 gap-4 p-4 border-b-2 border-foreground bg-muted/50">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-4 w-20" />
+          ))}
+        </div>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="grid grid-cols-5 gap-4 p-4 border-b-2 border-foreground last:border-0">
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-5 w-24 rounded-full" />
+            <Skeleton className="h-5 w-24" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function InvoicesPage() {
   const { invoices, loading, error, refetch } = useInvoices();
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <InvoicesSkeleton />;
 
   if (error) {
     return (

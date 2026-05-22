@@ -2,15 +2,52 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useInvoices } from "@/hooks/use-invoices";
 import { formatCurrency } from "@/lib/utils/format";
 import { FileText, Clock, TrendingUp, ArrowRight, AlertCircle } from "lucide-react";
 
+function ReportsSkeleton() {
+  return (
+    <div>
+      <Skeleton className="h-9 w-32 mb-1" />
+      <Skeleton className="h-5 w-64 mb-8" />
+      <div className="grid gap-4 md:grid-cols-3 mb-8">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-10 rounded-xl" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-9 w-32 mb-1" />
+              <Skeleton className="h-4 w-20" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="grid gap-6 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-12 w-12 rounded-xl mb-3" />
+              <Skeleton className="h-6 w-40 mb-2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-4 w-full mb-4" />
+              <Skeleton className="h-10 w-full rounded-xl" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ReportsPage() {
   const { invoices, loading, error, refetch } = useInvoices({ limit: 100 });
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <ReportsSkeleton />;
 
   if (error) {
     return (

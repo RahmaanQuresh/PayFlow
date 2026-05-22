@@ -3,15 +3,39 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/shared/empty-state";
 import { useInvoices } from "@/hooks/use-invoices";
 import { formatCurrency } from "@/lib/utils/format";
-import { ArrowRight, Scale, FileText, AlertTriangle, AlertCircle } from "lucide-react";
+import { ArrowRight, Scale, FileText, AlertTriangle, AlertCircle, CheckCircle } from "lucide-react";
+
+function LegalSkeleton() {
+  return (
+    <div>
+      <Skeleton className="h-9 w-48 mb-1" />
+      <Skeleton className="h-5 w-64 mb-8" />
+      <div className="grid gap-6 md:grid-cols-2 mb-8">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-12 w-12 rounded-xl mb-3" />
+              <Skeleton className="h-6 w-48 mb-2" />
+              <Skeleton className="h-4 w-full" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-10 w-48 rounded-xl" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function LegalPage() {
   const { invoices, loading, error, refetch } = useInvoices();
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <LegalSkeleton />;
 
   if (error) {
     return (
@@ -111,8 +135,12 @@ export default function LegalPage() {
           </div>
         </div>
       ) : (
-        <Card className="p-10 text-center">
-          <p className="text-muted-foreground font-medium">No overdue invoices — great job collecting payments!</p>
+        <Card className="p-10">
+          <EmptyState
+            icon={<CheckCircle />}
+            title="All caught up"
+            description="No overdue invoices — great job collecting payments!"
+          />
         </Card>
       )}
     </div>

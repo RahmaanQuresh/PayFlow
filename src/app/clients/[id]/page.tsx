@@ -4,17 +4,71 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useClient } from "@/hooks/use-clients";
 import { formatCurrency } from "@/lib/utils/format";
 import { ArrowLeft, Edit, Mail, Phone, Building, AlertCircle } from "lucide-react";
+
+function ClientDetailSkeleton() {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-10 w-10 rounded-lg" />
+          <div>
+            <Skeleton className="h-7 w-48 mb-1" />
+            <Skeleton className="h-5 w-32" />
+          </div>
+        </div>
+        <Skeleton className="h-9 w-20 rounded-lg" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-3 mb-6">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="pb-2">
+              <Skeleton className="h-3 w-24" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-24" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader><Skeleton className="h-6 w-40" /></CardHeader>
+          <CardContent className="space-y-3">
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-5 w-32" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <Skeleton className="h-6 w-36" />
+            <Skeleton className="h-8 w-28 rounded-lg" />
+          </CardHeader>
+          <CardContent>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="grid grid-cols-4 gap-4 p-3 border-b-2 border-foreground last:border-0">
+                <Skeleton className="h-5 w-28" />
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
 
 export default function ClientDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const { client, loading, error, refetch } = useClient(id);
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <ClientDetailSkeleton />;
 
   if (error || !client) {
     return (

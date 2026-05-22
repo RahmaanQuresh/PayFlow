@@ -5,17 +5,70 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useInvoice } from "@/hooks/use-invoices";
 import { formatCurrency } from "@/lib/utils/format";
 import { ArrowLeft, Download, Send, Pause, Play, AlertCircle } from "lucide-react";
+
+function InvoiceDetailSkeleton() {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-10 w-10 rounded-lg" />
+          <div>
+            <Skeleton className="h-7 w-40 mb-1" />
+            <Skeleton className="h-5 w-32" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-28 rounded-lg" />
+          <Skeleton className="h-8 w-20 rounded-lg" />
+        </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-3 mb-6">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="pb-2">
+              <Skeleton className="h-3 w-16" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-7 w-24" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="grid gap-6 md:grid-cols-2 mb-6">
+        <Card>
+          <CardHeader><Skeleton className="h-6 w-28" /></CardHeader>
+          <CardContent className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex justify-between py-3 border-b-2 border-foreground last:border-0">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-5 w-16" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader><Skeleton className="h-6 w-20" /></CardHeader>
+          <CardContent className="space-y-3">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-5 w-48" />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
 
 export default function InvoiceDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const { invoice, loading, error, refetch } = useInvoice(id);
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <InvoiceDetailSkeleton />;
 
   if (error || !invoice) {
     return (
