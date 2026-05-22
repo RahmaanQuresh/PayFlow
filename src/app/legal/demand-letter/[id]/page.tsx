@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { useInvoice } from "@/hooks/use-invoices";
 import { formatCurrency } from "@/lib/utils/format";
-import { ArrowLeft, Loader2, Download, RefreshCw, AlertCircle } from "lucide-react";
+import { ArrowLeft, Download, RefreshCw, AlertCircle } from "lucide-react";
 
 export default function InvoiceDemandLetterPage() {
   const params = useParams();
@@ -20,6 +20,7 @@ export default function InvoiceDemandLetterPage() {
 
   useEffect(() => {
     if (invoice) generateLetter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [invoice]);
 
   async function generateLetter() {

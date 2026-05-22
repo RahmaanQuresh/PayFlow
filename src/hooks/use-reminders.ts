@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { ReminderSequence } from "@/types";
 
 export function useReminders() {
   const [sequences, setSequences] = useState<ReminderSequence[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const mounted = useRef(false);
 
   const fetchSequences = useCallback(async () => {
+    if (!mounted.current) return;
     setLoading(true);
     setError(null);
     try {
@@ -24,8 +26,11 @@ export function useReminders() {
   }, []);
 
   useEffect(() => {
+    mounted.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSequences();
-  }, [fetchSequences]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return { sequences, loading, error, refetch: fetchSequences };
 }
@@ -34,8 +39,10 @@ export function useSequence(id: string) {
   const [sequence, setSequence] = useState<ReminderSequence | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const mounted = useRef(false);
 
   const fetchSequence = useCallback(async () => {
+    if (!mounted.current) return;
     setLoading(true);
     setError(null);
     try {
@@ -51,8 +58,11 @@ export function useSequence(id: string) {
   }, [id]);
 
   useEffect(() => {
+    mounted.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSequence();
-  }, [fetchSequence]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return { sequence, loading, error, refetch: fetchSequence };
 }

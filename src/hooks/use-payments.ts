@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { Payment } from "@/types";
 
 export function usePayments(opts: { page?: number; limit?: number } = {}) {
@@ -8,8 +8,10 @@ export function usePayments(opts: { page?: number; limit?: number } = {}) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const mounted = useRef(false);
 
   const fetchPayments = useCallback(async () => {
+    if (!mounted.current) return;
     setLoading(true);
     setError(null);
     try {
@@ -30,8 +32,11 @@ export function usePayments(opts: { page?: number; limit?: number } = {}) {
   }, [opts.page, opts.limit]);
 
   useEffect(() => {
+    mounted.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPayments();
-  }, [fetchPayments]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return { payments, total, loading, error, refetch: fetchPayments };
 }

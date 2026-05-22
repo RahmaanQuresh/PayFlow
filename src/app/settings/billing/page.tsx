@@ -21,7 +21,7 @@ export default function BillingPage() {
       <Card className="mb-6">
         <CardHeader><CardTitle>Current Plan</CardTitle></CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between p-5 rounded-2xl border-2 border-foreground bg-muted/20">
+          <div className="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl border-2 border-foreground bg-muted/20">
             <div>
               <div className="font-extrabold text-lg">Free Plan</div>
               <ul className="text-sm text-muted-foreground mt-2 space-y-1.5 font-medium">

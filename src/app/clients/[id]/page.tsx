@@ -66,7 +66,7 @@ function ClientDetailSkeleton() {
 export default function ClientDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  const { client, loading, error, refetch } = useClient(id);
+  const { client, loading, error } = useClient(id);
 
   if (loading) return <ClientDetailSkeleton />;
 
@@ -84,7 +84,7 @@ export default function ClientDetailPage() {
     );
   }
 
-  const invoices = (client as any).invoices || [];
+  const invoices = (client as unknown as { invoices?: Array<{ id: string; invoiceNumber: string; status: string; total: number; dueDate: string }> }).invoices || [];
 
   return (
     <div>
@@ -176,18 +176,19 @@ export default function ClientDetailPage() {
               </div>
             ) : (
               <div className="rounded-xl border-2 border-foreground overflow-hidden shadow-hard-sm">
-                <div className="grid grid-cols-4 gap-4 p-3 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b-2 border-foreground bg-muted/50">
-                  <div>Invoice</div>
-                  <div>Amount</div>
-                  <div>Status</div>
-                  <div>Due Date</div>
-                </div>
-                {invoices.map((inv: any) => (
-                  <Link
-                    key={inv.id}
-                    href={`/invoices/${inv.id}`}
-                    className="grid grid-cols-4 gap-4 p-3 text-sm hover:bg-tertiary/5 transition-colors border-b-2 border-foreground last:border-0 font-medium"
-                  >
+                <div className="overflow-x-auto">
+                  <div className="grid grid-cols-4 gap-4 p-3 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b-2 border-foreground bg-muted/50 min-w-[500px]">
+                    <div>Invoice</div>
+                    <div>Amount</div>
+                    <div>Status</div>
+                    <div>Due Date</div>
+                  </div>
+                  {invoices.map((inv) => (
+                    <Link
+                      key={inv.id}
+                      href={`/invoices/${inv.id}`}
+                      className="grid grid-cols-4 gap-4 p-3 text-sm hover:bg-tertiary/5 transition-colors border-b-2 border-foreground last:border-0 font-medium min-w-[500px]"
+                    >
                     <div className="font-bold">{inv.invoiceNumber}</div>
                     <div className="font-bold tabular-nums">{formatCurrency(Number(inv.total))}</div>
                     <div>
@@ -204,6 +205,7 @@ export default function ClientDetailPage() {
                     </div>
                   </Link>
                 ))}
+                </div>
               </div>
             )}
           </CardContent>

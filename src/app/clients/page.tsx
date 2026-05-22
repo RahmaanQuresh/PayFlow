@@ -57,7 +57,7 @@ export default function ClientsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <div>
           <h1 className="font-display font-extrabold text-3xl">Clients</h1>
           <p className="text-muted-foreground font-medium mt-1">Manage your clients</p>
@@ -82,18 +82,19 @@ export default function ClientsPage() {
         />
       ) : (
         <div className="rounded-2xl border-2 border-foreground overflow-hidden shadow-hard-sm">
-          <div className="grid grid-cols-4 gap-4 p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b-2 border-foreground bg-muted/50">
-            <div>Name</div>
-            <div>Email</div>
-            <div>Invoices</div>
-            <div>Total Paid</div>
-          </div>
-          {clients.map((c) => (
-            <Link
-              key={c.id}
-              href={`/clients/${c.id}`}
-              className="grid grid-cols-4 gap-4 p-4 text-sm hover:bg-tertiary/5 transition-colors border-b-2 border-foreground last:border-0 font-medium"
-            >
+          <div className="overflow-x-auto">
+            <div className="grid grid-cols-4 gap-4 p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b-2 border-foreground bg-muted/50 min-w-[500px]">
+              <div>Name</div>
+              <div>Email</div>
+              <div>Invoices</div>
+              <div>Total Paid</div>
+            </div>
+            {clients.map((c) => (
+              <Link
+                key={c.id}
+                href={`/clients/${c.id}`}
+                className="grid grid-cols-4 gap-4 p-4 text-sm hover:bg-tertiary/5 transition-colors border-b-2 border-foreground last:border-0 font-medium min-w-[500px]"
+              >
               <div>
                 <div className="font-bold">{c.name}</div>
                 {c.company && <div className="text-xs text-muted-foreground">{c.company}</div>}
@@ -103,6 +104,7 @@ export default function ClientsPage() {
               <div className="font-bold tabular-nums">{formatCurrency(Number(c.totalPaid))}</div>
             </Link>
           ))}
+          </div>
         </div>
       )}
     </div>

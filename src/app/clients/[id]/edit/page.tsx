@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -25,13 +25,15 @@ export default function ClientEditPage() {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const initialized = useRef(false);
   useEffect(() => {
-    if (client) {
+    if (client && !initialized.current) {
       setName(client.name || "");
       setEmail(client.email || "");
       setCompany(client.company || "");
       setPhone(client.phone || "");
       setNotes(client.notes || "");
+      initialized.current = true;
     }
   }, [client]);
 
@@ -149,7 +151,7 @@ export default function ClientEditPage() {
           </CardContent>
         </Card>
 
-        <div className="flex items-center justify-between mt-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
           <Button variant="destructive" type="button" onClick={handleDelete} disabled={deleting}>
             {deleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
             Delete Client

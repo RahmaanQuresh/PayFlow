@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -35,6 +36,16 @@ function LegalSkeleton() {
 export default function LegalPage() {
   const { invoices, loading, error, refetch } = useInvoices();
 
+  const overdueInvoices = useMemo(() => {
+    const now = new Date();
+    return invoices
+      .filter((i) => i.status === "overdue")
+      .map((inv) => ({
+        ...inv,
+        daysOverdue: Math.round((now.getTime() - new Date(inv.dueDate).getTime()) / 86400000),
+      }));
+  }, [invoices]);
+
   if (loading) return <LegalSkeleton />;
 
   if (error) {
@@ -49,8 +60,6 @@ export default function LegalPage() {
       </div>
     );
   }
-
-  const overdueInvoices = invoices.filter((i) => i.status === "overdue");
 
   return (
     <div>
@@ -109,29 +118,26 @@ export default function LegalPage() {
         <div>
           <h2 className="font-display font-extrabold text-xl mb-4">Overdue Invoices Eligible for Escalation</h2>
           <div className="rounded-2xl border-2 border-foreground overflow-hidden shadow-hard-sm">
-            {overdueInvoices.map((inv) => {
-              const daysOverdue = Math.round((Date.now() - new Date(inv.dueDate).getTime()) / 86400000);
-              return (
-                <div key={inv.id} className="flex items-center justify-between p-4 border-b-2 border-foreground last:border-0 hover:bg-tertiary/5 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-destructive/10 border-2 border-destructive">
-                      <AlertTriangle className="h-5 w-5 text-destructive" strokeWidth={2.5} />
-                    </div>
-                    <div>
-                      <div className="font-bold">{inv.invoiceNumber}</div>
-                      <div className="text-sm text-muted-foreground font-medium">{inv.client?.name}</div>
-                    </div>
+            {overdueInvoices.map((inv) => (
+              <div key={inv.id} className="flex flex-wrap items-center justify-between gap-3 p-4 border-b-2 border-foreground last:border-0 hover:bg-tertiary/5 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-destructive/10 border-2 border-destructive">
+                    <AlertTriangle className="h-5 w-5 text-destructive" strokeWidth={2.5} />
                   </div>
-                  <div className="text-right">
-                    <div className="font-extrabold">{formatCurrency(Number(inv.total))}</div>
-                    <div className="text-sm text-destructive font-bold">{daysOverdue} days overdue</div>
+                  <div>
+                    <div className="font-bold">{inv.invoiceNumber}</div>
+                    <div className="text-sm text-muted-foreground font-medium">{inv.client?.name}</div>
                   </div>
-                  <Link href={`/legal/demand-letter/${inv.id}`}>
-                    <Button variant="outline" size="sm"><FileText className="h-4 w-4 mr-2" /> Generate Letter</Button>
-                  </Link>
                 </div>
-              );
-            })}
+                <div className="text-right">
+                  <div className="font-extrabold">{formatCurrency(Number(inv.total))}</div>
+                  <div className="text-sm text-destructive font-bold">{inv.daysOverdue} days overdue</div>
+                </div>
+                <Link href={`/legal/demand-letter/${inv.id}`}>
+                  <Button variant="outline" size="sm"><FileText className="h-4 w-4 mr-2" /> Generate Letter</Button>
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
       ) : (

@@ -19,7 +19,6 @@ vi.mock("@/lib/db", () => ({
 import { prisma } from "@/lib/db";
 import {
   getInvoices,
-  getInvoice,
   createInvoice,
   sendInvoice,
   cancelInvoice,

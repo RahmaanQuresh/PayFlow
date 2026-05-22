@@ -165,35 +165,37 @@ export default function InvoiceCreatePage() {
           <Button variant="outline" size="sm" onClick={addLine}><Plus className="h-4 w-4 mr-1" /> Add Line Item</Button>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            <div className="grid grid-cols-12 gap-4 items-center text-xs font-bold uppercase tracking-wider text-muted-foreground pb-3 border-b-2 border-foreground">
-              <div className="col-span-5">Description</div>
-              <div className="col-span-2">Qty</div>
-              <div className="col-span-2">Rate</div>
-              <div className="col-span-2">Amount</div>
-              <div className="col-span-1"></div>
-            </div>
-            {lineItems.map((li, i) => (
-              <div key={i} className="grid grid-cols-12 gap-4 items-center">
-                <div className="col-span-5">
-                  <Input value={li.description} onChange={(e) => updateLine(i, "description", e.target.value)} placeholder="Service description" />
-                </div>
-                <div className="col-span-2">
-                  <Input type="number" value={li.quantity} onChange={(e) => updateLine(i, "quantity", Number(e.target.value))} min={1} />
-                </div>
-                <div className="col-span-2">
-                  <Input type="number" value={li.rate} onChange={(e) => updateLine(i, "rate", Number(e.target.value))} placeholder="0.00" min={0} step="0.01" />
-                </div>
-                <div className="col-span-2 text-right font-bold">{formatCurrency(li.quantity * li.rate)}</div>
-                <div className="col-span-1">
-                  {lineItems.length > 1 && (
-                    <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => removeLine(i)}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
+          <div className="overflow-x-auto">
+            <div className="space-y-3">
+              <div className="grid grid-cols-12 gap-4 items-center text-xs font-bold uppercase tracking-wider text-muted-foreground pb-3 border-b-2 border-foreground min-w-[640px]">
+                <div className="col-span-5">Description</div>
+                <div className="col-span-2">Qty</div>
+                <div className="col-span-2">Rate</div>
+                <div className="col-span-2">Amount</div>
+                <div className="col-span-1"></div>
               </div>
-            ))}
+              {lineItems.map((li, i) => (
+                <div key={i} className="grid grid-cols-12 gap-4 items-center min-w-[640px]">
+                  <div className="col-span-5">
+                    <Input value={li.description} onChange={(e) => updateLine(i, "description", e.target.value)} placeholder="Service description" />
+                  </div>
+                  <div className="col-span-2">
+                    <Input type="number" value={li.quantity} onChange={(e) => updateLine(i, "quantity", Number(e.target.value))} min={1} />
+                  </div>
+                  <div className="col-span-2">
+                    <Input type="number" value={li.rate} onChange={(e) => updateLine(i, "rate", Number(e.target.value))} placeholder="0.00" min={0} step="0.01" />
+                  </div>
+                  <div className="col-span-2 text-right font-bold">{formatCurrency(li.quantity * li.rate)}</div>
+                  <div className="col-span-1">
+                    {lineItems.length > 1 && (
+                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => removeLine(i)}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="flex justify-end mt-6 pt-4 border-t-2 border-foreground">
             <div className="w-56 space-y-2">

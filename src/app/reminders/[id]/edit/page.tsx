@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -27,11 +27,13 @@ export default function ReminderEditPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const initialized = useRef(false);
   useEffect(() => {
-    if (sequence) {
+    if (sequence && !initialized.current) {
       setName(sequence.name || "");
       setDescription(sequence.description || "");
       if (sequence.steps && sequence.steps.length > 0) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSteps(
           sequence.steps.map((s) => ({
             daysAfterDue: s.daysAfterDue,
@@ -42,6 +44,7 @@ export default function ReminderEditPage() {
           }))
         );
       }
+      initialized.current = true;
     }
   }, [sequence]);
 
@@ -194,7 +197,7 @@ export default function ReminderEditPage() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between mt-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
         <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
           {deleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
           Delete Sequence

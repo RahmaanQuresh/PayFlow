@@ -109,7 +109,7 @@ export default function SmallClaimsPage() {
               <ul className="text-sm text-muted-foreground font-medium space-y-1 mt-2">
                 <li>• <a href="https://www.usa.gov/small-claims-court" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">USA.gov — Small Claims Court Overview</a></li>
                 <li>• <a href="https://www.nolo.com/legal-encyclopedia/small-claims-court" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Nolo — Small Claims Court Resources</a></li>
-                <li>• Check your state's judiciary website for specific rules, forms, and fee schedules</li>
+                <li>• Check your state&rsquo;s judiciary website for specific rules, forms, and fee schedules</li>
               </ul>
             </div>
           </div>

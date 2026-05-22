@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
           {sent ? (
             <div className="text-center space-y-4">
               <p className="text-sm text-muted-foreground">
-                If an account exists with that email, you'll receive a password reset link shortly.
+                If an account exists with that email, you&rsquo;ll receive a password reset link shortly.
               </p>
               <Link href="/login">
                 <Button variant="gradient" className="w-full" size="lg">

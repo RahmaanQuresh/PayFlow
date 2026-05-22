@@ -74,7 +74,7 @@ export default function SecuritySettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Change Password</CardTitle>
-            <CardDescription>Use a strong password you don't use elsewhere.</CardDescription>
+            <CardDescription>Use a strong password you don&rsquo;t use elsewhere.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>

@@ -102,7 +102,7 @@ export default function RemindersPage() {
             {sequences.map((seq) => (
               <Card key={seq.id} className="group hover:-translate-y-[2px] hover:shadow-hard-lg relative">
                 <div className={`absolute -left-8 top-6 h-4 w-4 rounded-full bg-gradient-to-br ${toneGradients.friendly} border-2 border-foreground shadow-hard-sm`} />
-                <CardContent className="flex items-center justify-between py-5">
+                <CardContent className="flex flex-wrap items-center justify-between gap-3 py-5">
                   <div className="flex items-center gap-4">
                     <div className="hidden sm:flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary border-2 border-foreground shadow-hard-sm">
                       <Bell className="h-6 w-6 text-white" strokeWidth={2.5} />

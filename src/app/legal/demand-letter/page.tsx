@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { useInvoices } from "@/hooks/use-invoices";
 import { formatCurrency } from "@/lib/utils/format";
@@ -24,6 +23,8 @@ export default function DemandLetterPage() {
     setGenerating(true);
     setGenError("");
     try {
+      // eslint-disable-next-line react-hooks/purity
+      const daysOverdue = Math.max(0, Math.round((Date.now() - new Date(selectedInvoice.dueDate).getTime()) / 86400000));
       const res = await fetch("/api/ai/generate-demand-letter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -32,8 +33,7 @@ export default function DemandLetterPage() {
           clientCompany: selectedInvoice.client?.company || "",
           invoiceNumber: selectedInvoice.invoiceNumber,
           amount: selectedInvoice.total,
-          daysOverdue: Math.max(0, Math.round((Date.now() - new Date(selectedInvoice.dueDate).getTime()) / 86400000)),
-          freelancerName: "Freelancer",
+          daysOverdue,
           freelancerBusinessName: "",
           freelancerAddress: "",
           jurisdiction: "US",
@@ -81,7 +81,7 @@ export default function DemandLetterPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Generate a Demand Letter</CardTitle>
-            <CardDescription>Select an overdue invoice and we'll draft a legally-formatted demand letter.</CardDescription>
+            <CardDescription>Select an overdue invoice and we&rsquo;ll draft a legally-formatted demand letter.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -129,7 +129,7 @@ export default function DemandLetterPage() {
       ) : (
         <div className="space-y-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
               <div>
                 <CardTitle className="text-lg">{letter.subject}</CardTitle>
               </div>

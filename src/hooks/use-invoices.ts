@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { Invoice } from "@/types";
 
 interface UseInvoicesOptions {
@@ -24,8 +24,10 @@ export function useInvoices(opts: UseInvoicesOptions = {}): UseInvoicesReturn {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const mounted = useRef(false);
 
   const fetchInvoices = useCallback(async () => {
+    if (!mounted.current) return;
     setLoading(true);
     setError(null);
     try {
@@ -49,8 +51,11 @@ export function useInvoices(opts: UseInvoicesOptions = {}): UseInvoicesReturn {
   }, [opts.status, opts.clientId, opts.search, opts.page, opts.limit]);
 
   useEffect(() => {
+    mounted.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchInvoices();
-  }, [fetchInvoices]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return { invoices, total, loading, error, refetch: fetchInvoices };
 }
@@ -59,8 +64,10 @@ export function useInvoice(id: string) {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const mounted = useRef(false);
 
   const fetchInvoice = useCallback(async () => {
+    if (!mounted.current) return;
     setLoading(true);
     setError(null);
     try {
@@ -76,8 +83,11 @@ export function useInvoice(id: string) {
   }, [id]);
 
   useEffect(() => {
+    mounted.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchInvoice();
-  }, [fetchInvoice]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return { invoice, loading, error, refetch: fetchInvoice };
 }

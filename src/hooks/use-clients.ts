@@ -31,6 +31,7 @@ export function useClients(opts: { search?: string; page?: number; limit?: numbe
   }, [opts.search, opts.page, opts.limit]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchClients();
   }, [fetchClients]);
 
@@ -58,6 +59,7 @@ export function useClient(id: string) {
   }, [id]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchClient();
   }, [fetchClient]);
 

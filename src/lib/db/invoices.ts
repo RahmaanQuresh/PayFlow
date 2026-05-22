@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/db";
-import type { Invoice } from "@/types";
 
 export async function getInvoices(userId: string, filters?: {
   status?: string;

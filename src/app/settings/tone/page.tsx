@@ -59,7 +59,7 @@ export default function ToneSettingsPage() {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="text-lg">Tone Profiles</CardTitle>
-          <CardDescription>PayFlow AI adapts reminders to match the tone you select. Here's what each tone means.</CardDescription>
+          <CardDescription>PayFlow AI adapts reminders to match the tone you select. Here&rsquo;s what each tone means.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2">

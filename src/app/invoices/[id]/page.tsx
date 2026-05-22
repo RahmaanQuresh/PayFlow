@@ -66,7 +66,7 @@ function InvoiceDetailSkeleton() {
 export default function InvoiceDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  const { invoice, loading, error, refetch } = useInvoice(id);
+  const { invoice, loading, error } = useInvoice(id);
 
   if (loading) return <InvoiceDetailSkeleton />;
 

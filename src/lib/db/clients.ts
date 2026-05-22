@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/db";
-import type { Client } from "@/types";
 
 export async function getClients(userId: string, filters?: {
   search?: string;

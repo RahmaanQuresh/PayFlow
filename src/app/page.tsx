@@ -124,7 +124,7 @@ export default function HomePage() {
                 desc: "Generate formal demand letters and access small claims guides when reminders aren't enough.",
                 gradient: "from-tertiary to-orange-400",
               },
-            ].map((feature, i) => {
+            ].map((feature) => {
               const Icon = feature.icon;
               return (
                 <div
@@ -156,7 +156,7 @@ export default function HomePage() {
             </span>
           </h2>
           <p className="text-center text-muted-foreground mb-14 max-w-xl mx-auto font-medium">
-            Start free, upgrade when you're ready. No hidden fees, no surprises.
+            Start free, upgrade when you&rsquo;re ready. No hidden fees, no surprises.
           </p>
 
           <div className="grid gap-8 md:grid-cols-3 max-w-4xl mx-auto">

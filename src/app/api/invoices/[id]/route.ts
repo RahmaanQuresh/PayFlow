@@ -1,4 +1,4 @@
-import { getInvoice, updateInvoice, sendInvoice, cancelInvoice } from "@/lib/db/invoices";
+import { getInvoice, updateInvoice, cancelInvoice } from "@/lib/db/invoices";
 import { successResponse, apiError } from "@/lib/utils/errors";
 import { getSessionUserId } from "@/lib/auth/helpers";
 

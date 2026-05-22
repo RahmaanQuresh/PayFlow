@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,11 +53,17 @@ function DashboardSkeleton() {
 export default function DashboardPage() {
   const { invoices, loading, error, refetch } = useInvoices({ limit: 5 });
 
-  const outstanding = invoices.filter((i) => i.status === "sent" || i.status === "viewed");
-  const overdue = invoices.filter((i) => i.status === "overdue");
-  const paid30d = invoices.filter(
-    (i) => i.status === "paid" && new Date(i.paidAt || 0) > new Date(Date.now() - 30 * 86400000)
-  );
+  const { outstanding, overdue, paid30d } = useMemo(() => {
+    const now = new Date();
+    const thirtyDaysAgo = now.getTime() - 30 * 86400000;
+    return {
+      outstanding: invoices.filter((i) => i.status === "sent" || i.status === "viewed"),
+      overdue: invoices.filter((i) => i.status === "overdue"),
+      paid30d: invoices.filter(
+        (i) => i.status === "paid" && new Date(i.paidAt || 0).getTime() > thirtyDaysAgo
+      ),
+    };
+  }, [invoices]);
 
   if (loading) return <DashboardSkeleton />;
 
@@ -77,10 +84,10 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <div>
           <h1 className="font-display font-extrabold text-3xl">Dashboard</h1>
-          <p className="text-muted-foreground font-medium mt-1">Welcome back! Here's your overview.</p>
+          <p className="text-muted-foreground font-medium mt-1">Welcome back! Here&rsquo;s your overview.</p>
         </div>
         <Link href="/invoices/new">
           <Button variant="gradient">
