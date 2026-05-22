@@ -1,0 +1,352 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id                          String               @id @default(uuid())
+  email                       String               @unique
+  emailVerified               Boolean              @default(false)
+  name                        String
+  password                    String?
+  businessName                String?
+  phone                       String?
+  addressLine1                String?
+  addressLine2                String?
+  city                        String?
+  state                       String?
+  postalCode                  String?
+  country                     String               @default("US")
+  logoUrl                     String?
+  taxId                       String?
+  role                        String               @default("USER")
+  subscriptionStatus          String               @default("FREE")
+  stripeCustomerId            String?
+  stripeSubscriptionId        String?
+  subscriptionCurrentPeriodEnd DateTime?
+  stripeConnectAccountId      String?
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
+
+  clients               Client[]
+  invoices              Invoice[]
+  payments              Payment[]
+  reminderSequences     ReminderSequence[]
+  toneSamples           ToneSample[]
+  notifications         Notification[]
+  legalDocuments        LegalDocument[]
+  activityLogs          ActivityLog[]
+  accounts              Account[]
+  sessions              Session[]
+
+  @@index([email])
+  @@index([stripeCustomerId])
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  type      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([email])
+  @@map("verification_tokens")
+}
+
+model Client {
+  id               String    @id @default(uuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name             String
+  email            String
+  company          String?
+  phone            String?
+  addressLine1     String?
+  addressLine2     String?
+  city             String?
+  state            String?
+  postalCode       String?
+  country          String    @default("US")
+  notes            String?
+  totalInvoiced    Float     @default(0)
+  totalPaid        Float     @default(0)
+  totalOutstanding Float     @default(0)
+  invoiceCount     Int       @default(0)
+  lastInvoiceDate  DateTime?
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  invoices Invoice[]
+  payments Payment[]
+
+  @@index([userId])
+  @@index([email])
+  @@index([deletedAt])
+  @@map("clients")
+}
+
+model Invoice {
+  id                   String          @id @default(uuid())
+  userId               String
+  user                 User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId             String
+  client               Client          @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  invoiceNumber        String
+  title                String
+  description          String?
+  status               String          @default("DRAFT")
+  issueDate            DateTime        @default(now())
+  dueDate              DateTime
+  paymentTerms         String          @default("NET30")
+  currency             String          @default("USD")
+  subtotal             Float           @default(0)
+  discountType         String?
+  discountValue        Float           @default(0)
+  discountAmount       Float           @default(0)
+  taxRate              Float           @default(0)
+  taxAmount            Float           @default(0)
+  total                Float           @default(0)
+  paidAmount           Float           @default(0)
+  notes                String?
+  reminderSequenceId   String?
+  reminderSequence     ReminderSequence? @relation(fields: [reminderSequenceId], references: [id])
+  currentReminderStep  Int             @default(0)
+  nextReminderDate     DateTime?
+  remindersEnabled     Boolean         @default(true)
+  remindersPaused      Boolean         @default(false)
+  portalToken          String?         @unique
+  portalTokenExpiresAt DateTime?
+  sentAt               DateTime?
+  viewedAt             DateTime?
+  paidAt               DateTime?
+  canceledAt           DateTime?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  lineItems       LineItem[]
+  payments        Payment[]
+  remindersSent   ReminderSent[]
+  legalDocuments   LegalDocument[]
+
+  @@unique([userId, invoiceNumber])
+  @@index([userId])
+  @@index([clientId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([portalToken])
+  @@index([nextReminderDate])
+  @@map("invoices")
+}
+
+model LineItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Float    @default(1)
+  rate        Float
+  amount      Float
+  taxable     Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([invoiceId])
+  @@map("line_items")
+}
+
+model Payment {
+  id                    String        @id @default(uuid())
+  invoiceId             String
+  invoice               Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  userId                String
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId              String
+  client                Client        @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  amount                Float
+  method                String
+  status                String        @default("PENDING")
+  stripePaymentIntentId String?
+  razorpayOrderId       String?
+  razorpayPaymentId     String?
+  refundAmount          Float?
+  refundedAt            DateTime?
+  metadata              String?
+  paidAt                DateTime?
+  createdAt             DateTime      @default(now())
+
+  @@index([invoiceId])
+  @@index([userId])
+  @@index([clientId])
+  @@index([status])
+  @@index([stripePaymentIntentId])
+  @@map("payments")
+}
+
+model ReminderSequence {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  steps         ReminderStep[]
+  remindersSent ReminderSent[]
+  invoices      Invoice[]
+
+  @@index([userId])
+  @@index([userId, isDefault])
+  @@map("reminder_sequences")
+}
+
+model ReminderStep {
+  id           String       @id @default(uuid())
+  sequenceId   String
+  sequence     ReminderSequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  daysAfterDue Int
+  tone         String       @default("FRIENDLY")
+  subject      String
+  body         String
+  useAi        Boolean      @default(false)
+  sortOrder    Int          @default(0)
+  createdAt    DateTime     @default(now())
+
+  remindersSent ReminderSent[]
+
+  @@index([sequenceId])
+  @@map("reminder_steps")
+}
+
+model ReminderSent {
+  id              String         @id @default(uuid())
+  invoiceId       String
+  invoice         Invoice        @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  stepId          String
+  step            ReminderStep   @relation(fields: [stepId], references: [id], onDelete: Restrict)
+  sequenceId      String
+  sequence        ReminderSequence @relation(fields: [sequenceId], references: [id], onDelete: Restrict)
+  stepNumber      Int
+  subject         String
+  body            String
+  tone            String
+  wasAiGenerated  Boolean        @default(false)
+  wasEditedByUser Boolean        @default(false)
+  deliveryStatus  String         @default("PENDING")
+  openedAt        DateTime?
+  sentAt          DateTime       @default(now())
+  errorMessage    String?
+
+  @@index([invoiceId])
+  @@index([sentAt])
+  @@map("reminders_sent")
+}
+
+model ToneSample {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  context   String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("tone_samples")
+}
+
+model LegalDocument {
+  id           String   @id @default(uuid())
+  invoiceId    String
+  invoice      Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         String
+  content      String
+  pdfUrl       String?
+  jurisdiction String?
+  status       String   @default("GENERATED")
+  generatedAt  DateTime @default(now())
+  sentAt       DateTime?
+
+  @@index([invoiceId])
+  @@index([userId])
+  @@map("legal_documents")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  message   String
+  data      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+model ActivityLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  entityType String
+  entityId   String
+  action     String
+  details    String?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
