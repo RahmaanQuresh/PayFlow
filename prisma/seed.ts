@@ -1,11 +1,13 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaLibSql } from "@prisma/adapter-libsql";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 import * as bcrypt from "bcryptjs";
 import { randomUUID } from "node:crypto";
 
-const databaseUrl = process.env.DATABASE_URL || `file:${process.cwd()}/dev.db`;
+const databaseUrl = process.env.DATABASE_URL!;
 console.log(`Using database: ${databaseUrl}`);
-const adapter = new PrismaLibSql({ url: databaseUrl });
+const pool = new Pool({ connectionString: databaseUrl });
+const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {

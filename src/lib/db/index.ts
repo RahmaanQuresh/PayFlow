@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaLibSql } from "@prisma/adapter-libsql";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
@@ -8,19 +7,8 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function getPrismaClient() {
-  const databaseUrl = process.env.DATABASE_URL;
-
-  if (databaseUrl && databaseUrl.startsWith("postgres")) {
-    const pool = new Pool({ connectionString: databaseUrl });
-    const adapter = new PrismaPg(pool);
-    return new PrismaClient({ adapter });
-  }
-
-  const adapter = new PrismaLibSql({
-    url: databaseUrl && databaseUrl.startsWith("file:")
-      ? databaseUrl
-      : `file:${process.cwd()}/prisma/dev.db`,
-  });
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 }
 
