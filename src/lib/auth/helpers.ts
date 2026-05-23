@@ -1,9 +1,11 @@
-import { auth } from "@/auth";
+import { getSession } from "@/auth";
 
 export async function getSessionUserId(): Promise<string> {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const session = await getSession();
+  if (!session?.id) {
     throw new Error("Unauthorized: No valid session found");
   }
-  return session.user.id;
+  return session.id;
 }
+
+export { getSession };

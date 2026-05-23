@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import React from "react";
-import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard,
@@ -33,7 +33,13 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  async function handleSignOut() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -55,7 +61,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => signOut({ callbackUrl: "/login" })}>
+            <Button variant="ghost" size="icon" onClick={handleSignOut}>
               <LogOut className="h-5 w-5" />
             </Button>
           </div>

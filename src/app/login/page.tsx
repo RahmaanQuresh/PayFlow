@@ -13,6 +13,18 @@ async function fetchCsrfToken(): Promise<string> {
   return data.token || "";
 }
 
+async function doLogin(email: string, password: string, csrfToken: string) {
+  const res = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-csrf-token": csrfToken,
+    },
+    body: JSON.stringify({ email, password }),
+  });
+  return res.json();
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -30,17 +42,12 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-      callbackUrl: "/dashboard",
-    }, { csrfToken });
+    const result = await doLogin(email, password, csrfToken);
 
     setLoading(false);
 
-    if (result?.error) {
-      setError("Invalid email or password");
+    if (result.error) {
+      setError(result.error);
     } else {
       router.push("/dashboard");
     }
