@@ -7,8 +7,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useInvoices } from "@/hooks/use-invoices";
+import { useReports } from "@/hooks/use-reports";
 import { Plus, FileText, DollarSign, TrendingUp, ArrowRight, AlertCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/utils/format";
+import {
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  LineChart, Line, Legend,
+} from "recharts";
+
+const STATUS_COLORS: Record<string, string> = {
+  paid: "#22c55e",
+  partially_paid: "#a78bfa",
+  sent: "#3b82f6",
+  viewed: "#8b5cf6",
+  overdue: "#ef4444",
+  draft: "#6b7280",
+  canceled: "#9ca3af",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  paid: "Paid",
+  partially_paid: "Partially Paid",
+  sent: "Sent",
+  viewed: "Viewed",
+  overdue: "Overdue",
+  draft: "Draft",
+  canceled: "Canceled",
+};
 
 function DashboardSkeleton() {
   return (
@@ -29,31 +55,43 @@ function DashboardSkeleton() {
           </Card>
         ))}
       </div>
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-5 w-24" />
-        </div>
-        <div className="rounded-2xl border-2 border-foreground overflow-hidden">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="grid grid-cols-5 gap-4 p-4 border-b-2 border-foreground last:border-0">
-              <Skeleton className="h-5 w-28" />
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-5 w-20" />
-              <Skeleton className="h-5 w-24 rounded-full" />
-              <Skeleton className="h-5 w-24" />
-            </div>
-          ))}
-        </div>
+      <div className="grid gap-6 md:grid-cols-2 mb-8">
+        <Card>
+          <CardHeader><Skeleton className="h-6 w-40" /></CardHeader>
+          <CardContent><Skeleton className="h-60 w-full rounded-xl" /></CardContent>
+        </Card>
+        <Card>
+          <CardHeader><Skeleton className="h-6 w-40" /></CardHeader>
+          <CardContent><Skeleton className="h-60 w-full rounded-xl" /></CardContent>
+        </Card>
       </div>
+      <Card>
+        <CardHeader><Skeleton className="h-6 w-40" /></CardHeader>
+        <CardContent><Skeleton className="h-72 w-full rounded-xl" /></CardContent>
+      </Card>
     </div>
   );
 }
 
-export default function DashboardPage() {
-  const { invoices, loading, error, refetch } = useInvoices({ limit: 5 });
+function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
+}
 
-  const { outstanding, overdue, paid30d } = useMemo(() => {
+export default function DashboardPage() {
+  const { invoices, loading: invoicesLoading, error: invoicesError, refetch: refetchInvoices } = useInvoices({ limit: 5 });
+  const { data: reports, loading: reportsLoading, error: reportsError, refetch: refetchReports } = useReports();
+
+  const loading = invoicesLoading || reportsLoading;
+  const error = invoicesError || reportsError;
+
+  const { outstanding, overdue, paid30d, pieData, revenueData, overdueTrendData } = useMemo(() => {
     const now = new Date();
     const thirtyDaysAgo = now.getTime() - 30 * 86400000;
     return {
@@ -62,8 +100,15 @@ export default function DashboardPage() {
       paid30d: invoices.filter(
         (i) => i.status === "paid" && new Date(i.paidAt || 0).getTime() > thirtyDaysAgo
       ),
+      pieData: reports?.statusCounts
+        ? Object.entries(reports.statusCounts)
+            .filter(([, count]) => count > 0)
+            .map(([status, count]) => ({ name: STATUS_LABELS[status] || status, value: count, status }))
+        : [],
+      revenueData: reports?.monthlyRevenue || [],
+      overdueTrendData: reports?.overdueTrends || [],
     };
-  }, [invoices]);
+  }, [invoices, reports]);
 
   if (loading) return <DashboardSkeleton />;
 
@@ -75,7 +120,7 @@ export default function DashboardPage() {
         </div>
         <h2 className="font-display font-extrabold text-xl">Failed to load dashboard</h2>
         <p className="text-muted-foreground font-medium mt-1">{error}</p>
-        <Button variant="outline" className="mt-4" onClick={refetch}>
+        <Button variant="outline" className="mt-4" onClick={() => { refetchInvoices(); refetchReports(); }}>
           Try Again
         </Button>
       </div>
@@ -97,6 +142,7 @@ export default function DashboardPage() {
         </Link>
       </div>
 
+      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3 mb-8">
         <Card className="group hover:-translate-y-[3px] hover:shadow-hard-lg">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -156,6 +202,120 @@ export default function DashboardPage() {
         </Card>
       </div>
 
+      {/* Charts Row */}
+      <div className="grid gap-6 md:grid-cols-2 mb-8">
+        <ChartCard title="Invoice Status Breakdown">
+          {pieData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={240}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={95}
+                  paddingAngle={3}
+                  dataKey="value"
+                  stroke="var(--color-foreground)"
+                  strokeWidth={2}
+                >
+                  {pieData.map((entry) => (
+                    <Cell key={entry.status} fill={STATUS_COLORS[entry.status] || "#6b7280"} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--color-background)",
+                    border: "2px solid var(--color-foreground)",
+                    borderRadius: "12px",
+                    fontWeight: 600,
+                  }}
+                  formatter={(value) => {
+                    const v = Number(value);
+                    return [`${v} invoice${v !== 1 ? "s" : ""}`, undefined];
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-60 text-muted-foreground font-medium">No invoice data yet</div>
+          )}
+        </ChartCard>
+
+        <ChartCard title="Monthly Revenue (12 months)">
+          {revenueData.some((d) => d.revenue > 0) ? (
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={revenueData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fontWeight: 600 }} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fontWeight: 600 }} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--color-background)",
+                    border: "2px solid var(--color-foreground)",
+                    borderRadius: "12px",
+                    fontWeight: 600,
+                  }}
+                  formatter={(value) => [formatCurrency(Number(value)), "Revenue"]}
+                />
+                <Bar dataKey="revenue" radius={[6, 6, 0, 0]} fill="url(#revenueGradient)" />
+                <defs>
+                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--color-primary)" />
+                    <stop offset="100%" stopColor="var(--color-secondary)" />
+                  </linearGradient>
+                </defs>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-60 text-muted-foreground font-medium">No paid invoices yet</div>
+          )}
+        </ChartCard>
+      </div>
+
+      {/* Overdue Trends */}
+      <div className="mb-8">
+        <ChartCard title="Overdue Trends (6 months)">
+          {overdueTrendData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={overdueTrendData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fontWeight: 600 }} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fontWeight: 600 }} tickLine={false} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--color-background)",
+                    border: "2px solid var(--color-foreground)",
+                    borderRadius: "12px",
+                    fontWeight: 600,
+                  }}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#ef4444"
+                  strokeWidth={3}
+                  dot={{ fill: "#ef4444", r: 5, strokeWidth: 2 }}
+                  name="Overdue Invoices"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="#3b82f6"
+                  strokeWidth={3}
+                  dot={{ fill: "#3b82f6", r: 5, strokeWidth: 2 }}
+                  name="Amount ($)"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-60 text-muted-foreground font-medium">No overdue data yet</div>
+          )}
+        </ChartCard>
+      </div>
+
+      {/* Recent Invoices */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display font-extrabold text-xl">Recent Invoices</h2>

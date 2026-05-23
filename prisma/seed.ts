@@ -1,8 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 import * as bcrypt from "bcryptjs";
 import { randomUUID } from "node:crypto";
 
-const prisma = new PrismaClient();
+const databaseUrl = process.env.DATABASE_URL || `file:${process.cwd()}/dev.db`;
+console.log(`Using database: ${databaseUrl}`);
+const adapter = new PrismaLibSql({ url: databaseUrl });
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log("🌱 Seeding PayFlow demo data...\n");
