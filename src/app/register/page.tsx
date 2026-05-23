@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Zap, Loader2 } from "lucide-react";
 
@@ -55,13 +54,18 @@ export default function RegisterPage() {
         return;
       }
 
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      const loginRes = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          [csrf.headerName]: csrf.token,
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (result?.error) {
+      const loginData = await loginRes.json();
+
+      if (!loginRes.ok) {
         setError("Account created but login failed. Please log in manually.");
         setLoading(false);
         return;
