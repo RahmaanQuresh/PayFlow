@@ -4,19 +4,14 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: process.env.AUTH_SECRET || "b819faa94bde137a486c52937aaf1e88c990ec7f96de318c460709ae51c65bc2",
-  session: { strategy: "jwt" },
-  trustHost: true,
-  pages: {
-    signIn: "/login",
-  },
   providers: [
     Credentials({
+      name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials) => {
+      async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
         const user = await prisma.user.findUnique({
@@ -40,14 +35,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  session: { strategy: "jwt" },
+  pages: { signIn: "/login" },
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
       }
       return token;
     },
-    session({ session, token }) {
+    async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
       }
