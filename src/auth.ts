@@ -6,51 +6,21 @@ import bcrypt from "bcryptjs";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
-      name: "credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        email: { type: "email" },
+        password: { type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+          where: { email: String(credentials.email) },
         });
-
-        if (!user || !user.password) return null;
-
-        const valid = await bcrypt.compare(
-          credentials.password as string,
-          user.password
-        );
-
-        if (!valid) return null;
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        };
+        if (!user?.password) return null;
+        const ok = await bcrypt.compare(String(credentials.password), user.password);
+        if (!ok) return null;
+        return { id: user.id, email: user.email, name: user.name };
       },
     }),
   ],
-  session: { strategy: "jwt" },
-  pages: { signIn: "/login" },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-      }
-      return session;
-    },
-  },
+  secret: process.env.AUTH_SECRET || "d8b8c569eae175baa067de60f36540912e9baa357e2c20150a1d3e4e7c04b8c4",
   trustHost: true,
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "d8b8c569eae175ba",
 });
