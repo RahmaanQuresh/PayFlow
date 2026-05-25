@@ -30,11 +30,24 @@ async function getPayPalToken(): Promise<string> {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { invoiceId, invoiceNumber, total, currency = "USD" } = body;
+    const { invoiceId, invoiceNumber, total, currency = "USD", clientId, userId } = body;
 
     const accessToken = await getPayPalToken();
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+    const purchaseUnit: Record<string, unknown> = {
+      reference_id: invoiceId,
+      description: `Payment for invoice ${invoiceNumber}`,
+      amount: {
+        currency_code: currency,
+        value: Number(total).toFixed(2),
+      },
+    };
+
+    if (invoiceId || userId) {
+      purchaseUnit.custom_id = JSON.stringify({ invoiceId, userId, clientId });
+    }
 
     const orderRes = await fetch(`${PAYPAL_BASE}/v2/checkout/orders`, {
       method: "POST",
@@ -44,16 +57,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         intent: "CAPTURE",
-        purchase_units: [
-          {
-            reference_id: invoiceId,
-            description: `Payment for invoice ${invoiceNumber}`,
-            amount: {
-              currency_code: currency,
-              value: total.toFixed(2),
-            },
-          },
-        ],
+        purchase_units: [purchaseUnit],
         application_context: {
           brand_name: "PayFlow",
           landing_page: "LOGIN",

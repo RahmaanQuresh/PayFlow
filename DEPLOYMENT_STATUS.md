@@ -69,20 +69,36 @@ POSTGRES_* (various Neon connection strings)
 
 ---
 
+## Payment Fixes (May 25, 2026)
+
+### Fixed
+- ✅ Stripe success page verify route (`/api/payments/verify`) — was 404, now working
+- ✅ PayPal webhook signature verification via `verify-webhook-signature` API
+- ✅ PayPal create-order now passes `custom_id` (invoiceId, userId, clientId) for webhook correlation
+- ✅ UPI/Razorpay frontend added to pay page with full checkout flow
+- ✅ New env var: `PAYPAL_WEBHOOK_ID` added to `.env.example`
+
+### Files Changed
+```
+src/app/api/payments/verify/route.ts          — New (was missing)
+src/app/api/payments/paypal/create-order/route.ts — Pass custom_id
+src/app/api/webhooks/paypal/route.ts           — Signature verification + custom_id parsing
+src/app/pay/[token]/page.tsx                   — UPI/Razorpay option
+.env.example                                    — Added PAYPAL_WEBHOOK_ID
+```
+
 ## Remaining Work
 
 - [ ] Seed demo data to production database (`pnpm seed`)
-- [ ] Stripe payment integration (missing env vars: `STRIPE_SECRET_KEY`, etc.)
+- [ ] Set real Stripe/PayPal/Razorpay env vars in Vercel (`STRIPE_SECRET_KEY`, `PAYPAL_CLIENT_ID`, `RAZORPAY_KEY_SECRET`, etc.)
+- [ ] Set `PAYPAL_WEBHOOK_ID` in Vercel for signature verification
 - [ ] Email sending (needs `RESEND_API_KEY`)
 - [ ] OpenAI integration (needs `OPENAI_API_KEY`)
-- [ ] Razorpay/UPI payments
 - [ ] Inngest background jobs
 - [ ] Rate limiting (currently in-memory, needs Redis/Upstash for production)
 - [ ] Password reset flow (email-based)
 - [ ] Legal document generation
-- [ ] PayPal integration
 - [ ] Reports/analytics verification
-- [ ] Stripe webhooks
 - [ ] Vercel Blob storage for PDFs
 
 ---
